@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fd74b74e447f5d34386998ed0934cdec
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329334
+  packageName: Easy Transition Free - Scene Manager & Screen Effects
+  packageVersion: 1.1.3
+  assetPath: Assets/Easy Transition/Demo/Transition Effects/WipeBottomRightEffect.asset
+  uploadId: 938020
