@@ -30,3 +30,15 @@ public class MoveCondition : Condition
         return elevate.moveState== elevateState;
     }
 }
+
+[Serializable]
+public class SeesawCondition : Condition
+{
+    public SeesawController seesaw;
+    public SeesawState seesawState;
+
+    public override bool IsCorrect()
+    {
+        return seesaw.state == seesawState;
+    }
+} 
