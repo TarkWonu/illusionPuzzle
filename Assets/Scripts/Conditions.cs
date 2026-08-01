@@ -1,5 +1,7 @@
 using System;
 
+using UnityEngine;
+
 [Serializable]
 public abstract class Condition
 {
@@ -11,11 +13,13 @@ public abstract class Condition
 public class RotateCondition : Condition
 {
     public RotatePath rotate;
-    public PathRotateState rotateState;
+    public float rotA;
+    public float rotB;
 
     public override bool IsCorrect()
     {
-        return rotate.pathRotate== rotateState;
+        Debug.Log($"rotate:{rotate.GetAngle()}");
+        return rotA< rotate.GetAngle() && rotate.GetAngle()  < rotB;
     }
 }
 
