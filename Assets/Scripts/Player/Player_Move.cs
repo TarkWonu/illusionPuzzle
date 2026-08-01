@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Player_Move : MonoBehaviour
@@ -12,11 +13,14 @@ public class Player_Move : MonoBehaviour
 
     
 
+    
+
    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         ObjClickManager.Instance.playerMove += CheckClick;
+        
     }
     void OnDestroy()
     {
@@ -25,6 +29,11 @@ public class Player_Move : MonoBehaviour
             ObjClickManager.Instance.playerMove -= CheckClick;
 
         }
+    }
+
+    void Update()
+    {
+        
     }
 
 
@@ -80,6 +89,7 @@ public class Player_Move : MonoBehaviour
             mvseq.OnComplete(() =>
             {
                 RoadConnectManager.Instance.state = GameStates.idle;
+                
             });
         }
         else
@@ -145,6 +155,8 @@ public class Player_Move : MonoBehaviour
 
         
     }
+
+    
 
 
 }

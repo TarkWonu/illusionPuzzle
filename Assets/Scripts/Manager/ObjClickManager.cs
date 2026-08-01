@@ -42,7 +42,7 @@ public class ObjClickManager : Singleton<ObjClickManager>
                 return;
             }
 
-            hit.transform.GetComponent<RotateHandle>()?.rotatePath.RotateBridge();
+            
             hit.transform.GetComponent<ElevatorHandle>()?.elevatePath.MovePath();
         }
         else if (Physics.Raycast(ray, out hit, 1000f, roadLayer))
