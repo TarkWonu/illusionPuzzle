@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,41 +10,63 @@ public class RotateHandle : MonoBehaviour,IDraggableHandle
      
 
     
-    [SerializeField] private float sensitivity = 1f;
+    
 
-    private Vector3 dir;
 
-    private float previousMouseAngle;
+    private float startMouseAngle;
+    private Quaternion startObjectAngle;
+    private Quaternion startHandleRot;
 
     public void BeginDrag()
     {
         if(rotatePath.CheckPlayerInRoad()||RoadConnectManager.Instance.state == GameStates.playerMoving) return;
-
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
         RoadConnectManager.Instance.state = GameStates.bridgeMoving;
 
-        if(rotatePath.rotdir == RotateDir.x)
-        {
-            dir = new Vector3(1,0,0);
-        }
-        if(rotatePath.rotdir == RotateDir.y)
-        {
-            dir = new Vector3(0,1,0);
-        }
-        if(rotatePath.rotdir == RotateDir.z)
-        {
-            dir = new Vector3(0,0,1);
-        }
+        Vector3 centerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
+        
+       
+        Vector3 dir = Input.mousePosition- centerScreenPos;
+        
+        
+        startMouseAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        
+        
+        startObjectAngle = transform.rotation;
+        startHandleRot = rotatePath.transform.rotation;
+
+        
     }
 
     public void UpdateDrag()
     {
         if(rotatePath.CheckPlayerInRoad()||RoadConnectManager.Instance.state == GameStates.playerMoving) return;
-        float mouseX = Input.GetAxis("Mouse X");
-        transform.Rotate(dir*sensitivity*mouseX);
+            Vector3 centerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
+            Vector3 dir = Input.mousePosition - centerScreenPos;
+            
+           
+            float currentMouseAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            
+            
+            float angleDifference = currentMouseAngle - startMouseAngle;
 
-        rotatePath.gameObject.transform.rotation = transform.rotation;
+            Vector3 axis = new Vector3();
+            
+
+            switch (rotatePath.rotdir)
+            {
+                case RotateDir.x : axis = Vector3.right; angleDifference *= -1; break;
+                case RotateDir.y : axis = Vector3.up; angleDifference *= -1; break;
+                case RotateDir.z : axis = Vector3.forward; angleDifference *= -1; break;
+
+
+            }
+
+            Quaternion delta = Quaternion.AngleAxis(angleDifference,axis); 
+            rotatePath.transform.rotation = delta * startHandleRot;
+            transform.rotation = delta * startObjectAngle;
+
+
+            
 
     }
 
