@@ -1,12 +1,15 @@
 using DG.Tweening;
 using UnityEngine;
 
-public enum PlateMode { Hold , Toggle }
+public enum PlateMode { Momentary, Toggle }
 
 public class Plate : MonoBehaviour
 {
     [Header("모드")]
-    [SerializeField] private PlateMode mode = PlateMode.Hold ;
+    [SerializeField] private PlateMode mode = PlateMode.Momentary;
+
+    [Header("이 발판이 놓여있는 길")]
+    [SerializeField] private Roads plateRoad;
 
     [Header("발판을 누르면 이동할 오브젝트")]
     [SerializeField] private Transform target;
@@ -14,15 +17,14 @@ public class Plate : MonoBehaviour
     [SerializeField] private Vector3 posOn;
     [SerializeField] private float moveDuration = 0.3f;
 
-    [Header("눌릴 발판")]
+    [Header("발판 자체의 눌림 연출 (선택)")]
     [SerializeField] private Transform plateVisual;
     [SerializeField] private float plateUpY;
     [SerializeField] private float plateDownY;
 
     private bool isPressed;
-    private bool isLocked; // Toggle 모드에서 한번 눌리면 true로 고정
-    private bool hasPending;
-    private bool pendingPressed;
+    private bool isLocked;
+    private GameStates prevState;
     private Tween targetTween;
     private Tween plateTween;
 
@@ -35,38 +37,33 @@ public class Plate : MonoBehaviour
             p.y = plateUpY;
             plateVisual.localPosition = p;
         }
-    }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.layer != 7) return;
-        RequestState(true);
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.layer != 7) return;
-
-        if (mode == PlateMode.Toggle) return; // 고정 모드는 벗어나도 무시
-        RequestState(false);
-    }
-
-    void RequestState(bool pressed)
-    {
-        if (mode == PlateMode.Toggle && isLocked) return; // 이미 고정됐으면 더 이상 반응 안 함
-        if (isPressed == pressed) { hasPending = false; return; }
-
-        pendingPressed = pressed;
-        hasPending = true;
+        prevState = RoadConnectManager.Instance.state;
+        EvaluatePlayerOnPlate(); // 씬 시작 시 이미 이 칸 위에 있는 경우 대비
     }
 
     void Update()
     {
-        if (!hasPending) return;
-        if (RoadConnectManager.Instance.state != GameStates.idle) return;
+        GameStates cur = RoadConnectManager.Instance.state;
 
-        hasPending = false;
-        Press(pendingPressed);
+        // 방금 막 idle로 전환된 프레임(=이동이 완전히 끝난 순간)에만 판정
+        if (prevState != GameStates.idle && cur == GameStates.idle)
+        {
+            EvaluatePlayerOnPlate();
+        }
+        prevState = cur;
+    }
+
+    void EvaluatePlayerOnPlate()
+    {
+        if (mode == PlateMode.Toggle && isLocked) return;
+
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        bool playerHere = playerObj != null && playerObj.transform.parent == plateRoad.transform;
+
+        if (playerHere == isPressed) return;
+
+        Press(playerHere);
     }
 
     void Press(bool pressed)
