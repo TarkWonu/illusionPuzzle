@@ -70,7 +70,7 @@ public class Entity : MonoBehaviour
 
         transform.DOMove(targetPos, moveDuration).OnComplete(() =>
         {
-            // 도착 후에 밟은 길로 부모 교체 (그 길이 돌면 같이 돌게)
+            
             currentRoad = next;
             transform.SetParent(next.transform);
             moving = false;

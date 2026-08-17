@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 
@@ -17,11 +18,12 @@ public class RotatePath : MonoBehaviour
     [SerializeField] private float rotationSpeed;
     [SerializeField] public RotateDir rotdir; 
     
+    LayerMask mask;
     private Vector3 dir = new Vector3(0,0,0);
     
     void Start()
     {
-        
+        mask = LayerMask.GetMask("Entity") | LayerMask.GetMask("Player");
         
         
     }
@@ -36,10 +38,11 @@ public class RotatePath : MonoBehaviour
     public bool CheckPlayerInRoad()
     {
         Transform[] myChildren = this.GetComponentsInChildren<Transform>();
+        Debug.Log(mask.value);
         
         foreach(Transform child in myChildren)
         {
-            if(child.gameObject.layer == 7)
+            if((mask.value & (1<<child.gameObject.layer)) != 0 )
             {
                 return true;
             }

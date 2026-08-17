@@ -72,9 +72,22 @@ public class RotateHandle : MonoBehaviour,IDraggableHandle
 
     public void EndDrag()
     {
+        FloorRot(rotatePath.transform);
+        FloorRot(transform);
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         RoadConnectManager.Instance.state = GameStates.idle;
+    }
+
+    void FloorRot(Transform t)
+    {
+        Vector3 euler = t.rotation.eulerAngles;
+
+        float x = Mathf.Floor(euler.x);
+        float y = Mathf.Floor(euler.y);
+        float z = Mathf.Floor(euler.z);
+
+        t.rotation = Quaternion.Euler(new Vector3(x,y,z));
     }
 
     
