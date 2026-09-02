@@ -63,6 +63,10 @@ public class Player_Move : MonoBehaviour
             float moveDuration = 0.2f;
             foreach (var road in route)
             {
+                if (road.CheckEntityInRoad())
+                {
+                    break;
+                }
                 Vector3 targetPos = road.transform.position + new Vector3(0, 0.5f, 0);
                 Vector3 dir = targetPos - prevPos;
                 dir.y = 0f;

@@ -1,86 +1,63 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System.Linq;
 
 public class Entity : MonoBehaviour
 {
-    [Header("경로 설정")]
-    [SerializeField] private List<Roads> path;
-
-    [Header("이동 설정")]
-    [SerializeField] private float moveDuration = 0.2f;
-    [SerializeField] private float stepInterval = 0.4f;
-    [SerializeField] private Vector3 heightOffset = new Vector3(0, 0.5f, 0);
+    
+    [SerializeField] private float moveDuration = 2f;
+    [SerializeField] private LayerMask layer;
 
     private Roads currentRoad;
-    private bool reversed;
-    private int index = 0;
-    private bool moving;
+    private Roads targetRoad;
+    private Roads previousRoad;
 
     void Start()
     {
-        currentRoad = path[0];
-        transform.parent = currentRoad.transform;
-        transform.position = currentRoad.transform.position + heightOffset;
-
-        InvokeRepeating(nameof(MoveEntity), stepInterval, stepInterval);
-        RoadConnectManager.Instance.connectRoad.Invoke();
+        RaycastHit hit;
+        Physics.Raycast(transform.position,Vector3.down,out hit,1f,layer);
+        currentRoad = hit.transform.GetComponent<Roads>();
+        MoveToNext();
     }
 
-    void MoveEntity()
+    void MoveToNext()
     {
-        if (moving) return;
-        
-
-        if (index <= 0)              reversed = false;
-        if (index >= path.Count - 1) reversed = true;
-
-        int nextIndex = Mathf.Clamp(index + (reversed ? -1 : 1), 0, path.Count - 1);
-        Roads next = path[nextIndex];
-
-        if (IsConnected(next))
+        if (currentRoad == null)
         {
-            StepTo(next, nextIndex);
+            Debug.Log("CurrentRoad is Null idiot.");
+            return;
         }
-        else
+        targetRoad = PickNextRoad();
+        transform.DOMove(targetRoad.transform.position+ new Vector3(0, 1f, 0) ,moveDuration).
+        SetEase(Ease.Linear).OnComplete(() =>
         {
+            if (targetRoad != currentRoad)
+            {
+                previousRoad = currentRoad;
+                currentRoad = targetRoad;
+            }
+            transform.parent = currentRoad.transform;
             
-            reversed = !reversed;
-            int backIndex = Mathf.Clamp(index + (reversed ? -1 : 1), 0, path.Count - 1);
-            Roads back = path[backIndex];
-
-            if (backIndex != index && IsConnected(back))
-                StepTo(back, backIndex);
-            
-        }
-    }
-
-    bool IsConnected(Roads road)
-    {
-        return currentRoad == road || currentRoad.connectRoad.Contains(road);
-    }
-
-    void StepTo(Roads next, int nextIndex)
-    {
-        moving = true;
-        index = nextIndex;
-
-        
-        Vector3 targetPos = next.transform.position + heightOffset;
-
-        transform.DOMove(targetPos, moveDuration).OnComplete(() =>
-        {
-            
-            currentRoad = next;
-            transform.SetParent(next.transform);
-            moving = false;
-            RoadConnectManager.Instance.connectRoad.Invoke();
+            MoveToNext();
         });
+        
+            
+        
     }
 
-    private void OnDrawGizmos()
+    Roads PickNextRoad()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position, Vector3.down);
+        Debug.Log("fahhhhhhh");
+        var ableRoadList = currentRoad.connectRoad.Where(r=> r != previousRoad&& r!= null).ToList();
+        if (ableRoadList.Count > 0)
+        {
+            if (ableRoadList[0].CheckPlayerInRoad())
+            {
+                return currentRoad;
+            }
+            return ableRoadList[0];
+        }
+        return previousRoad;
     }
 }

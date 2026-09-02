@@ -31,10 +31,16 @@ public class Roads : MonoBehaviour
     private readonly Vector3[] dirs ={Vector3.back,Vector3.forward,
         Vector3.left,Vector3.right};
 
+    private LayerMask playermask;
+    private LayerMask entitymask;
+
 
     void Awake()
     {
         RoadConnectManager.Instance.connectRoad += MakeConnect;
+        MakeConnect();
+        playermask = LayerMask.GetMask("Player");
+        entitymask = LayerMask.GetMask("Entity");
     }
     void OnDestroy()
     {
@@ -98,5 +104,37 @@ public class Roads : MonoBehaviour
             }
         }
         return true;
+    }
+
+    public bool CheckPlayerInRoad()
+    {
+        Transform[] myChildren = this.GetComponentsInChildren<Transform>();
+        
+        
+        foreach(Transform child in myChildren)
+        {
+            if((playermask.value & (1<<child.gameObject.layer)) != 0 )
+            {
+                return true;
+            }
+        }
+        return false;
+            
+    }
+
+    public bool CheckEntityInRoad()
+    {
+        Transform[] myChildren = this.GetComponentsInChildren<Transform>();
+            
+        
+        foreach(Transform child in myChildren)
+        {
+            if((entitymask.value & (1<<child.gameObject.layer)) != 0 )
+            {
+                return true;
+            }
+        }
+        return false;
+            
     }
 }
